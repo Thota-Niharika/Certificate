@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, FileText, CheckCircle2, LayoutTemplate, Image as ImageIcon, RefreshCw } from 'lucide-react';
+import { Upload, FileText, CheckCircle2, LayoutTemplate, Image as ImageIcon, RefreshCw, Download } from 'lucide-react';
 import Papa from 'papaparse';
 import gyLogo from '../assets/gy1-png.png';
 import GLogoCertificateTemplate from './GLogoCertificateTemplate';
@@ -65,7 +65,7 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
         <div>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '4px' }}>Designer Workspace</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            Upload CSV with columns: <code style={{ color: 'var(--accent-primary)', fontWeight: '600' }}>studentName, email, webinarName</code>
+            Upload CSV with columns: <code style={{ color: 'var(--accent-primary)', fontWeight: '600' }}>studentName, email, webinarName, issueDate, certificateId</code>
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -78,6 +78,16 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
             Upload Template
           </button>
           
+          <a 
+            href="/sample.csv" 
+            download="sample.csv"
+            className="btn-secondary"
+            style={{ padding: '10px 16px', fontSize: '0.9rem', background: '#ffffff', color: 'var(--text-primary)', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Download size={16} color="var(--accent-primary)" />
+            Sample CSV
+          </a>
+
           <button 
             onClick={() => csvInputRef.current?.click()}
             className="btn-secondary"
@@ -99,7 +109,7 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
             type="file" 
             ref={csvInputRef} 
             onChange={handleCsvSelect} 
-            accept=".csv" 
+            accept=".csv, text/csv, application/vnd.ms-excel, application/csv, text/x-csv, application/x-csv, text/comma-separated-values, text/x-comma-separated-values, .txt, text/plain" 
             style={{ display: 'none' }} 
           />
         </div>
@@ -113,11 +123,13 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
               <FileText size={18} color="var(--accent-primary)" />
               <h3 style={{ fontSize: '0.95rem', fontWeight: '700' }}>CSV Contents ({csvData.length} records)</h3>
             </div>
-            <div style={{ display: 'flex', gap: '6px' }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               {[
                 { label: 'studentName', aliases: ['studentName', 'name', 'recipient', 'participant'] },
                 { label: 'email', aliases: ['email', 'mail', 'email address'] },
-                { label: 'webinarName', aliases: ['webinarName', 'webinar', 'course', 'event'] }
+                { label: 'webinarName', aliases: ['webinarName', 'webinar', 'course', 'event'] },
+                { label: 'issueDate', aliases: ['issueDate', 'date', 'issued'] },
+                { label: 'certificateId', aliases: ['certificateId', 'certId', 'id'] }
               ].map(col => {
                 const exists = Object.keys(csvData[0]).some(k => 
                   col.aliases.some(a => k.toLowerCase().includes(a.toLowerCase()))
@@ -143,6 +155,8 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
                   <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Name</th>
                   <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Email</th>
                   <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Webinar</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Issue Date</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Cert ID</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,6 +165,8 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
                     <td style={{ padding: '10px 12px' }}>{getField(row, 'studentName', 'name', 'recipient')}</td>
                     <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{getField(row, 'email', 'mail')}</td>
                     <td style={{ padding: '10px 12px', fontStyle: 'italic' }}>{getField(row, 'webinarName', 'webinar', 'course')}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{getField(row, 'issueDate', 'date', 'issued')}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{getField(row, 'certificateId', 'certId', 'id')}</td>
                   </tr>
                 ))}
               </tbody>

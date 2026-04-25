@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Clock, CheckCircle, XCircle, Eye, Edit2, X, Save, Award, Zap, AlertCircle, FileType, Download, RefreshCw, Loader2 } from 'lucide-react';
 import gyLogo from '../assets/gy1-png.png';
 import isoNewBadge from '../assets/iso-new-badge.png';
@@ -13,7 +14,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   const [error, setError] = useState(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [templateUrl, setTemplateUrl] = useState(null);
-  const [filter, setFilter] = useState('all'); 
+  const [filter, setFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('allTime');
   const [editingRecord, setEditingRecord] = useState(null);
   const [previewRecord, setPreviewRecord] = useState(null);
@@ -64,8 +65,45 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
       // Normalize array entries correctly
       const normalizedLogs = (Array.isArray(logsData) ? logsData : []).map(normalizeBackendRecord);
 
+      // Sort logs to show recently generated certificates at the top
+      normalizedLogs.sort((a, b) => {
+        // Helper to parse dates including DD-MM-YYYY
+        const parseDate = (dStr) => {
+          if (!dStr || dStr === '-') return NaN;
+          let d = new Date(dStr);
+          if (!isNaN(d)) return d.getTime();
+          const parts = dStr.split('-');
+          if (parts.length === 3 && parts[2].length === 4) {
+            d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            if (!isNaN(d)) return d.getTime();
+          }
+          return NaN;
+        };
+
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        
+        // If dates are valid and different, sort by date
+        if (!isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
+          return dateB - dateA; // Newest first
+        }
+        
+        // Fallback to numeric ID sort (extract numbers from string like 'GTAWP001' -> 1)
+        const idAStr = String(a.id || '');
+        const idBStr = String(b.id || '');
+        const numA = parseInt(idAStr.replace(/[^0-9]/g, ''), 10);
+        const numB = parseInt(idBStr.replace(/[^0-9]/g, ''), 10);
+        
+        if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+          return numB - numA; // Highest ID first (assuming sequential)
+        }
+        
+        // Final fallback: string locale compare
+        return idBStr.localeCompare(idAStr);
+      });
+
       setLogs(normalizedLogs);
-      
+
       // Calculate missing stats from array if backend format changes, else rely on actual values
       setStats({
         total: statsData.total || statsData.Total || 0,
@@ -85,12 +123,12 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
 
   useEffect(() => {
     fetchData();
-    
+
     // Auto-polling: Sync every 10 seconds to catch state transitions generally
     const pollInterval = setInterval(() => {
       fetchData(true);
     }, 10000);
-    
+
     // Start the simulated scheduler (runs every 5 minutes / 300,000ms)
     const schedId = startScheduler(() => {
       fetchData(true);
@@ -146,19 +184,19 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
     const today = new Date();
     const currentDate = today.toISOString().split('T')[0];
     const currentMonth = today.toISOString().slice(0, 7);
-    
+
     // Support multiple date formats (ISO: YYYY-MM-DD or standard display)
     const logDate = log.date || '';
-    
+
     if (timeFilter === 'today' && !logDate.includes(currentDate)) return false;
     if (timeFilter === 'thisMonth' && !logDate.includes(currentMonth)) return false;
 
     // Search Query Filter
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
-      if (!log.name.toLowerCase().includes(q) && 
-          !log.email.toLowerCase().includes(q) && 
-          !log.id.toLowerCase().includes(q)) {
+      if (!log.name.toLowerCase().includes(q) &&
+        !log.email.toLowerCase().includes(q) &&
+        !log.id.toLowerCase().includes(q)) {
         return false;
       }
     }
@@ -191,22 +229,22 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
           { label: 'Retry', value: totals.retry, icon: Clock, color: 'var(--accent-secondary)', bg: 'rgba(139, 92, 246, 0.08)' },
           { label: 'Failed', value: totals.failed, icon: XCircle, color: 'var(--accent-danger)', bg: 'rgba(239, 68, 68, 0.08)' }
         ].map((item, index) => (
-          <div key={index} className="glass-panel" style={{ 
-            padding: '24px 20px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '16px', 
+          <div key={index} className="glass-panel" style={{
+            padding: '24px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
             background: item.bg,
             border: `1px solid ${item.color}20`,
             borderRadius: '20px'
           }}>
-            <div style={{ 
-              width: '52px', 
-              height: '52px', 
-              borderRadius: '14px', 
-              background: '#ffffff', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <div style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: '14px',
+              background: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
               color: item.color
@@ -227,13 +265,13 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
               <h2 style={{ fontSize: '1.4rem', fontWeight: '700' }}>Delivery Tracking</h2>
-              <button 
-                onClick={() => fetchData()} 
+              <button
+                onClick={() => fetchData()}
                 title="Sync now"
-                style={{ 
-                  background: 'transparent', 
-                  border: 'none', 
-                  color: 'var(--accent-primary)', 
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent-primary)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -246,19 +284,19 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
               >
                 <RefreshCw size={18} className={loading ? "spin-animation" : ""} />
               </button>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px', 
-                padding: '4px 10px', 
-                borderRadius: '99px', 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '99px',
                 background: error ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
                 border: `1px solid ${error ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`
               }}>
-                <div style={{ 
-                  width: '8px', 
-                  height: '8px', 
-                  borderRadius: '50%', 
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
                   background: error ? 'var(--accent-danger)' : 'var(--accent-success)',
                   boxShadow: `0 0 10px ${error ? 'var(--accent-danger)' : 'var(--accent-success)'}`
                 }} />
@@ -269,7 +307,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Zap size={14} color="var(--accent-primary)" />
-              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.18:8080</code>
+              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.22:8080</code>
             </p>
           </div>
         </div>
@@ -277,7 +315,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
 
           {/* Time Filter Dropdown */}
-          <select 
+          <select
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
             className="input-field"
@@ -297,17 +335,17 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
               { id: STATUS.RETRY, label: 'Retry', color: 'var(--accent-secondary)' },
               { id: STATUS.FAILED, label: 'Failed', color: 'var(--accent-danger)' }
             ].map(tab => (
-              <button 
+              <button
                 key={tab.id}
                 onClick={() => setFilter(tab.id)}
-                style={{ 
-                  padding: '8px 16px', 
-                  borderRadius: '8px', 
-                  fontSize: '0.85rem', 
-                  fontWeight: '600', 
-                  transition: 'var(--transition-smooth)', 
-                  background: filter === tab.id ? '#ffffff' : 'transparent', 
-                  color: filter === tab.id ? tab.color : 'var(--text-secondary)', 
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem',
+                  fontWeight: '600',
+                  transition: 'var(--transition-smooth)',
+                  background: filter === tab.id ? '#ffffff' : 'transparent',
+                  color: filter === tab.id ? tab.color : 'var(--text-secondary)',
                   boxShadow: filter === tab.id ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
                   border: filter === tab.id ? '1px solid rgba(0,0,0,0.05)' : '1px solid transparent'
                 }}
@@ -399,7 +437,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <button 
+                      <button
                         onClick={() => setPreviewRecord(log)}
                         style={{ padding: '6px', background: 'rgba(0,0,0,0.05)', borderRadius: '6px', color: 'var(--text-primary)', transition: 'var(--transition-smooth)' }}
                         title="Preview Certificate"
@@ -427,25 +465,25 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
 
 
       {/* Preview Modal Overlay */}
-      {previewRecord && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '40px 24px', overflowY: 'auto' }}>
-          <button onClick={() => setPreviewRecord(null)} style={{ position: 'fixed', top: '24px', right: '32px', background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%', color: 'white', display: 'flex', zIndex: 1001 }}>
+      {previewRecord && createPortal(
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', overflowY: 'auto' }}>
+          <button onClick={() => setPreviewRecord(null)} style={{ position: 'absolute', top: '24px', right: '32px', background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%', color: 'white', display: 'flex', zIndex: 1001 }}>
             <X size={24} />
           </button>
-          
+
           <h3 style={{ color: 'white', marginBottom: '24px', fontWeight: '500', letterSpacing: '1px', textAlign: 'center' }}>Certificate Preview for {previewRecord.email}</h3>
-          
+
           {/* Actual Certificate Preview */}
-          <div style={{ 
-            width: 'min(95vw, calc(80vh * (900/716)))',
-            aspectRatio: '900 / 716',
-            borderRadius: '16px', 
+          <div style={{
+            width: 'min(95vw, calc(80vh * (900/656)))',
+            aspectRatio: '900 / 656',
+            borderRadius: '16px',
             position: 'relative',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
             background: '#fff',
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             padding: '12px',
             overflow: 'hidden'
           }}>
@@ -454,28 +492,29 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
                 <RefreshCw className="spin-animation" size={32} color="var(--accent-primary)" />
               </div>
             )}
-            <iframe 
-              src={`/api/certificates/preview/${previewRecord.id}`} 
+            <iframe
+              src={`/api/certificates/preview/${previewRecord.id}`}
               title="Certificate PDF Preview"
               onLoad={() => setIsPreviewLoading(false)}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
+              style={{
+                width: '100%',
+                height: '100%',
                 border: 'none',
                 borderRadius: '8px'
               }}
             />
           </div>
-          <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'flex-end', width: '100%', maxWidth: '1000px' }}>
-            <button 
+          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: '1000px' }}>
+            <button
               onClick={downloadCertificate}
               className="btn-primary"
-              style={{ padding: '10px 18px', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              style={{ padding: '10px 24px', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
-              <Download size={16} /> Download Preview
+              <Download size={18} /> Download Preview
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style>{`

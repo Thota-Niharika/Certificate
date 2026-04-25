@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { User, Mail, Award, Send, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Mail, Award, Send, Zap, CheckCircle2, AlertCircle, Calendar, Hash } from 'lucide-react';
 import { isRetryable } from '../utils/statusUtils';
 
 const SingleGenerationForm = ({ onComplete, onDataChange }) => {
   const [formData, setFormData] = useState({
     studentName: '',
     email: '',
-    webinarName: ''
+    webinarName: '',
+    issueDate: '',
+    certificateId: ''
   });
 
   React.useEffect(() => {
@@ -39,7 +41,7 @@ const SingleGenerationForm = ({ onComplete, onDataChange }) => {
           type: 'success',
           message: responseText || 'Certificate queued — status: PENDING'
         });
-        setFormData({ studentName: '', email: '', webinarName: '' });
+        setFormData({ studentName: '', email: '', webinarName: '', issueDate: '', certificateId: '' });
         if (onComplete) onComplete();
       } else {
         throw new Error(responseText || 'Failed to generate certificate');
@@ -102,6 +104,30 @@ const SingleGenerationForm = ({ onComplete, onDataChange }) => {
             value={formData.webinarName}
             onChange={(e) => setFormData({ ...formData, webinarName: e.target.value })}
             required
+          />
+        </div>
+
+        <div style={{ position: 'relative' }}>
+          <Calendar size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Issue Date (e.g., DD-MM-YYYY)"
+            className="input-field"
+            style={{ paddingLeft: '40px' }}
+            value={formData.issueDate}
+            onChange={(e) => setFormData({ ...formData, issueDate: e.target.value })}
+          />
+        </div>
+
+        <div style={{ position: 'relative' }}>
+          <Hash size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Certificate ID (e.g., GTAWP001)"
+            className="input-field"
+            style={{ paddingLeft: '40px' }}
+            value={formData.certificateId}
+            onChange={(e) => setFormData({ ...formData, certificateId: e.target.value })}
           />
         </div>
 

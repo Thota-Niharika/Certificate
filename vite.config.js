@@ -8,7 +8,7 @@ export default defineConfig({
     host: true, // Exposes the server on the local network
     proxy: {
       '/api': {
-        target: 'http://192.168.1.18:8080',
+        target: 'http://192.168.1.22:8080',
         changeOrigin: true,
         secure: false, // Useful for self-signed certificates or HTTP
         rewrite: (path) => path.replace(/^\/api/, '/api'),

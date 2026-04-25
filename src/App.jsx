@@ -16,7 +16,9 @@ function App() {
   const [singleData, setSingleData] = useState({
     studentName: '',
     webinarName: '',
-    email: ''
+    email: '',
+    issueDate: '',
+    certificateId: ''
   });
 
   return (
@@ -34,15 +36,18 @@ function App() {
             {/* Bottom Row: Side-By-Side Issuance & Preview */}
             <div style={{ display: 'grid', gridTemplateColumns: '420px 1fr', gap: '32px', alignItems: 'start' }}>
               
-              {/* Left Side: Single Candidate Form */}
+              {/* Left Side: Single Candidate Form & Bulk Action */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 <SingleGenerationForm 
                   onDataChange={setSingleData} 
                   onComplete={() => setActiveTab('tracking')} 
                 />
+                
+                {/* Bulk Action button moved to the left side */}
+                <ConfigurationPanel csvFile={csvFile} setActiveTab={setActiveTab} />
               </div>
 
-              {/* Right Side: Preview & Bulk Action */}
+              {/* Right Side: Preview */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                 <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}>
                   <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', background: 'rgba(255,255,255,0.7)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -57,15 +62,12 @@ function App() {
                       <GLogoCertificateTemplate 
                         studentName={singleData.studentName || "Candidate Name"}
                         courseName={singleData.webinarName || "Webinar / Course Name"}
-                        issueDate={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}
-                        certificateId="PREVIEW-MODE"
+                        issueDate={singleData.issueDate || new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}
+                        certificateId={singleData.certificateId || "PREVIEW-MODE"}
                       />
                     </div>
                   </div>
                 </div>
-                
-                {/* Action button now under the preview */}
-                <ConfigurationPanel csvFile={csvFile} setActiveTab={setActiveTab} />
               </div>
 
             </div>
