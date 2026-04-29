@@ -41,7 +41,7 @@ const ConfigurationPanel = ({ csvFile, setActiveTab }) => {
   };
 
   return (
-    <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+    <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', padding: '24px' }}>
 
       {/* Error Output */}
       {errorStatus && (

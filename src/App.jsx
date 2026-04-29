@@ -42,9 +42,6 @@ function App() {
                   onDataChange={setSingleData} 
                   onComplete={() => setActiveTab('tracking')} 
                 />
-                
-                {/* Bulk Action button moved to the left side */}
-                <ConfigurationPanel csvFile={csvFile} setActiveTab={setActiveTab} />
               </div>
 
               {/* Right Side: Preview */}
@@ -68,6 +65,9 @@ function App() {
                     </div>
                   </div>
                 </div>
+                
+                {/* Bulk Action button moved under the certificate template preview */}
+                <ConfigurationPanel csvFile={csvFile} setActiveTab={setActiveTab} />
               </div>
 
             </div>

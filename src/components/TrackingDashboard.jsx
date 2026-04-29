@@ -82,22 +82,22 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
 
         const dateA = parseDate(a.date);
         const dateB = parseDate(b.date);
-        
+
         // If dates are valid and different, sort by date
         if (!isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
           return dateB - dateA; // Newest first
         }
-        
+
         // Fallback to numeric ID sort (extract numbers from string like 'GTAWP001' -> 1)
         const idAStr = String(a.id || '');
         const idBStr = String(b.id || '');
         const numA = parseInt(idAStr.replace(/[^0-9]/g, ''), 10);
         const numB = parseInt(idBStr.replace(/[^0-9]/g, ''), 10);
-        
+
         if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
           return numB - numA; // Highest ID first (assuming sequential)
         }
-        
+
         // Final fallback: string locale compare
         return idBStr.localeCompare(idAStr);
       });
@@ -307,7 +307,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Zap size={14} color="var(--accent-primary)" />
-              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.22:8080</code>
+              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.7:8080</code>
             </p>
           </div>
         </div>
