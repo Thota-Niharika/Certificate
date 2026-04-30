@@ -6,6 +6,8 @@ import isoNewBadge from '../assets/iso-new-badge.png';
 import { STATUS, normalizeBackendRecord } from '../utils/statusUtils';
 import { startScheduler, stopScheduler } from '../services/schedulerService';
 
+const API_BASE = 'http://192.168.1.7:8080';
+
 const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   // --- 1. STATE DEFINITIONS ---
   const [logs, setLogs] = useState([]);
@@ -32,7 +34,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
 
   const downloadCertificate = () => {
     if (!previewRecord) return;
-    const previewUrl = `/api/certificates/preview/${previewRecord.id || previewRecord.certificateId}`;
+    const previewUrl = `${API_BASE}/api/certificates/preview/${previewRecord.id || previewRecord.certificateId}`;
     const link = document.createElement("a");
     link.href = previewUrl;
     link.download = `Certificate_${previewRecord.name.replace(/\s+/g, '_')}.pdf`;
@@ -45,8 +47,8 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
     setError(null);
     try {
       const [logsRes, statsRes] = await Promise.all([
-        fetch('/api/certificates'),
-        fetch('/api/certificates/stats')
+        fetch(`${API_BASE}/api/certificates`),
+        fetch(`${API_BASE}/api/certificates/stats`)
       ]);
 
       // Read actual error body for better diagnostics on 500s
@@ -143,7 +145,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   const handleRetryFailed = async () => {
     setIsRetrying(true);
     try {
-      const response = await fetch('/api/certificates/retry-failed', {
+      const response = await fetch(`${API_BASE}/api/certificates/retry-failed`, {
         method: 'POST'
       });
       if (!response.ok) throw new Error('Retry failed');
@@ -160,7 +162,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
     // If backend supports per-ID retry later, replace this URL.
     setIsRetrying(true);
     try {
-      const response = await fetch('/api/certificates/retry-failed', {
+      const response = await fetch(`${API_BASE}/api/certificates/retry-failed`, {
         method: 'POST'
       });
       if (!response.ok) throw new Error('Retry failed');
@@ -207,6 +209,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   const totals = {
     all: baseFilteredLogs.length,
     sent: baseFilteredLogs.filter(l => l.status === STATUS.SENT).length,
+    pending: baseFilteredLogs.filter(l => l.status === STATUS.PENDING).length,
     processing: baseFilteredLogs.filter(l => l.status === STATUS.PROCESSING).length,
     retry: baseFilteredLogs.filter(l => l.status === STATUS.RETRY).length,
     failed: baseFilteredLogs.filter(l => l.status === STATUS.FAILED).length
@@ -221,12 +224,13 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   return (
     <div className="glass-panel" style={{ minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
       {/* KPI Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '32px' }}>
         {[
           { label: 'Total Records', value: totals.all, icon: Award, color: 'var(--accent-primary)', bg: 'rgba(59, 130, 246, 0.08)' },
           { label: 'Sent', value: totals.sent, icon: CheckCircle, color: 'var(--accent-success)', bg: 'rgba(16, 185, 129, 0.08)' },
+          { label: 'Pending', value: totals.pending, icon: Clock, color: '#6b7280', bg: 'rgba(107, 114, 128, 0.08)' },
           { label: 'Processing', value: totals.processing, icon: Loader2, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)' },
-          { label: 'Retry', value: totals.retry, icon: Clock, color: 'var(--accent-secondary)', bg: 'rgba(139, 92, 246, 0.08)' },
+          { label: 'Retry', value: totals.retry, icon: RefreshCw, color: 'var(--accent-secondary)', bg: 'rgba(139, 92, 246, 0.08)' },
           { label: 'Failed', value: totals.failed, icon: XCircle, color: 'var(--accent-danger)', bg: 'rgba(239, 68, 68, 0.08)' }
         ].map((item, index) => (
           <div key={index} className="glass-panel" style={{
@@ -331,6 +335,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             {[
               { id: 'all', label: 'All', color: 'var(--accent-primary)' },
               { id: STATUS.SENT, label: 'Sent', color: 'var(--accent-success)' },
+              { id: STATUS.PENDING, label: 'Pending', color: '#6b7280' },
               { id: STATUS.PROCESSING, label: 'Processing', color: '#f59e0b' },
               { id: STATUS.RETRY, label: 'Retry', color: 'var(--accent-secondary)' },
               { id: STATUS.FAILED, label: 'Failed', color: 'var(--accent-danger)' }
@@ -397,7 +402,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
                   <td style={{ padding: '16px' }}>
                     {log.status === STATUS.PENDING ? (
                       <span className="badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(107, 114, 128, 0.1)', color: '#4b5563' }}>
-                        <Clock size={12} /> Queued
+                        <Clock size={12} /> Pending
                       </span>
                     ) : log.status === STATUS.PROCESSING ? (
                       <span className="badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(245, 158, 11, 0.1)', color: '#d97706' }}>
@@ -493,7 +498,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
               </div>
             )}
             <iframe
-              src={`/api/certificates/preview/${previewRecord.id}`}
+              src={`${API_BASE}/api/certificates/preview/${previewRecord.id}`}
               title="Certificate PDF Preview"
               onLoad={() => setIsPreviewLoading(false)}
               style={{

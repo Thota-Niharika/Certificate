@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { User, Mail, Award, Send, Zap, CheckCircle2, AlertCircle, Calendar, Hash } from 'lucide-react';
 import { isRetryable } from '../utils/statusUtils';
 
+const API_BASE = 'http://192.168.1.7:8080';
+
 const SingleGenerationForm = ({ onComplete, onDataChange }) => {
   const [formData, setFormData] = useState({
     studentName: '',
@@ -26,7 +28,7 @@ const SingleGenerationForm = ({ onComplete, onDataChange }) => {
     setStatus(null);
 
     try {
-      const response = await fetch('/api/certificates/single', {
+      const response = await fetch(`${API_BASE}/api/certificates/single`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

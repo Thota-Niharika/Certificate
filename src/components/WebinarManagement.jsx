@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Link as LinkIcon, Copy, Plus, Trash2, CheckCircle2, ExternalLink } from 'lucide-react';
 
+const API_BASE = 'http://192.168.1.7:8080';
+
 const WebinarManagement = () => {
   const [webinars, setWebinars] = useState([]);
   const [formData, setFormData] = useState({
@@ -20,7 +22,7 @@ const WebinarManagement = () => {
 
   const fetchWebinars = async () => {
     try {
-      const response = await fetch('/api/webinars');
+      const response = await fetch(`${API_BASE}/api/webinars`);
       if (response.ok) {
         const data = await response.json();
         setWebinars(data);
@@ -41,11 +43,11 @@ const WebinarManagement = () => {
     setGeneratedLink('');
 
     try {
-      const response = await fetch('/api/webinars/create', {
+      const response = await fetch(`${API_BASE}/api/webinars/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          webinarTitle: formData.title,
+          title: formData.title,
           eventDate: formData.eventDate,
           startTime: formData.startTime,
           endTime: formData.endTime
@@ -61,7 +63,7 @@ const WebinarManagement = () => {
         
         if (newId) {
           // Construct the registration link
-          const registrationUrl = `https://webinarcertificates.netlify.app/registration/form?webinarId=${newId}`;
+          const registrationUrl = `${window.location.origin}/registration/form?webinarId=${newId}`;
           setGeneratedLink(registrationUrl);
         } else {
           setGeneratedLink('Error: Backend did not return the webinar ID. Please find the link in the Recent Webinars table below.');
@@ -250,12 +252,12 @@ const WebinarManagement = () => {
                           <button 
                             className="btn-secondary" 
                             style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                            onClick={() => copyToClipboard(`https://webinarcertificates.netlify.app/registration/form?webinarId=${webinar.id}`)}
+                            onClick={() => copyToClipboard(`${window.location.origin}/registration/form?webinarId=${webinar.id}`)}
                           >
                             <Copy size={14} style={{ marginRight: '4px' }} /> Link
                           </button>
                           <a 
-                            href={`https://webinarcertificates.netlify.app/registration/form?webinarId=${webinar.id}`} 
+                            href={`/registration/form?webinarId=${webinar.id}`} 
                             target="_blank" 
                             className="btn-secondary"
                             style={{ padding: '6px 12px', fontSize: '0.8rem' }}

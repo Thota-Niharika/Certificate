@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Send, Zap, AlertCircle } from 'lucide-react';
 
+const API_BASE = 'http://192.168.1.7:8080';
+
 const ConfigurationPanel = ({ csvFile, setActiveTab }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorStatus, setErrorStatus] = useState(null);
@@ -19,7 +21,7 @@ const ConfigurationPanel = ({ csvFile, setActiveTab }) => {
     formData.append('file', csvFile);
 
     try {
-      const response = await fetch('/api/certificates/upload', {
+      const response = await fetch(`${API_BASE}/api/certificates/upload`, {
         method: 'POST',
         body: formData,
       });

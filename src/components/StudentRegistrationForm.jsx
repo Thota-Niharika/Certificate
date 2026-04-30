@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CheckCircle2, AlertCircle, Loader2, Send, Calendar } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Send, Calendar, XCircle } from 'lucide-react';
 import './StudentRegistrationForm.css';
+
+const API_BASE = 'http://192.168.1.7:8080';
 
 const StudentRegistrationForm = () => {
   const [searchParams] = useSearchParams();
@@ -29,7 +31,7 @@ const StudentRegistrationForm = () => {
 
   useEffect(() => {
     if (webinarId) {
-      fetch(`/api/webinars/${webinarId}`)
+      fetch(`${API_BASE}/api/webinars/${webinarId}`)
         .then(res => {
           if (res.ok) return res.json();
           throw new Error('Failed to fetch webinar details');
@@ -80,7 +82,7 @@ const StudentRegistrationForm = () => {
     setStatus('loading');
 
     try {
-      const response = await fetch('/api/form/submit', {
+      const response = await fetch(`${API_BASE}/api/form/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,16 +91,27 @@ const StudentRegistrationForm = () => {
         })
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Could not parse error response as JSON", responseText);
+      }
 
       if (response.ok) {
         setStatus('success');
-      } else if (response.status === 409 || (data.message && data.message.toLowerCase().includes('already'))) {
-        setStatus('duplicate');
-      } else if (response.status === 410 || (data.message && data.message.toLowerCase().includes('expired'))) {
-        setStatus('expired');
       } else {
-        setStatus('error');
+        const errorMsg = data.error || data.message || responseText;
+        console.error(`Server Error (${response.status}):`, errorMsg);
+        
+        if (errorMsg.toLowerCase().includes('already')) {
+          setStatus('duplicate');
+        } else if (errorMsg.toLowerCase().includes('expired')) {
+          setStatus('expired');
+        } else {
+          setStatus('error');
+        }
       }
     } catch (err) {
       console.error('Submission error:', err);
@@ -130,15 +143,9 @@ const StudentRegistrationForm = () => {
         message = "This webinar registration form is no longer accepting responses.";
         typeClass = "error";
         break;
-      case 'no-webinar':
-        icon = <AlertCircle size={48} />;
-        title = "Missing Webinar ID";
-        message = "Please use the official link provided to register for a webinar.";
-        typeClass = "error";
-        break;
       case 'error':
       default:
-        icon = <AlertCircle size={48} />;
+        icon = <XCircle size={64} />;
         title = "Oops!";
         message = "Something went wrong. Please check your connection and try again.";
         typeClass = "error";
@@ -147,26 +154,38 @@ const StudentRegistrationForm = () => {
 
     return (
       <div className="feedback-overlay">
-        <div className={`feedback-icon ${typeClass}`}>
-          {icon}
+        <div className={`feedback-card-inner ${typeClass}`}>
+          <div className="feedback-icon-wrapper">
+            {icon}
+          </div>
+          <h2 className="feedback-title">{title}</h2>
+          <p className="feedback-message">{message}</p>
+          
+          {(status === 'error' || status === 'no-webinar') && (
+            <button className="retry-btn" onClick={() => status !== 'no-webinar' && setStatus('idle')}>
+              {status === 'no-webinar' ? 'Go to Home' : 'Try Again'}
+            </button>
+          )}
+          
+          {status === 'success' && (
+            <div className="success-badge">
+              <CheckCircle2 size={16} /> 
+              Verification Email Sent
+            </div>
+          )}
         </div>
-        <h2 className="feedback-title">{title}</h2>
-        <p className="feedback-message">{message}</p>
-        {(status === 'error' || status === 'no-webinar') && (
-          <button className="btn-secondary" onClick={() => status !== 'no-webinar' && setStatus('idle')}>
-            {status === 'no-webinar' ? 'Go to Home' : 'Try Again'}
-          </button>
-        )}
       </div>
     );
   };
 
   return (
     <div className="registration-container">
-      <div className="registration-card">
+      <div className={`registration-card ${status !== 'idle' && status !== 'loading' ? 'has-feedback' : ''}`}>
         {renderFeedback()}
         
-        <div className="registration-header">
+        {(status === 'idle' || status === 'loading') && (
+          <>
+            <div className="registration-header">
           <h1>{webinarDetails ? (webinarDetails.webinarTitle || webinarDetails.title || 'Webinar Registration') : 'Webinar Registration'}</h1>
           <p>
             {webinarDetails && webinarDetails.eventDate ? (
@@ -381,6 +400,8 @@ const StudentRegistrationForm = () => {
             )}
           </button>
         </form>
+          </>
+        )}
       </div>
     </div>
   );
