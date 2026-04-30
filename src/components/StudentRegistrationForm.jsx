@@ -1,0 +1,345 @@
+import React, { useState } from 'react';
+import { CheckCircle2, AlertCircle, Loader2, Send } from 'lucide-react';
+import './StudentRegistrationForm.css';
+
+const StudentRegistrationForm = () => {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    collegeName: '',
+    department: '',
+    yearOfStudy: '',
+    crName: '',
+    crPhone: '',
+    friendName: '',
+    friendCollege: '',
+    friendPhone: '',
+    confirmation: false
+  });
+
+  const [status, setStatus] = useState('idle'); // idle, loading, success-eligible, success-stored, error, duplicate
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.fullName.trim()) newErrors.fullName = 'Required';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email';
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Required';
+    } else if (!/^\d{10,}$/.test(formData.phone.replace(/\D/g, ''))) {
+      newErrors.phone = 'Invalid phone number';
+    }
+    if (!formData.collegeName.trim()) newErrors.collegeName = 'Required';
+    if (!formData.department.trim()) newErrors.department = 'Required';
+    if (!formData.yearOfStudy) newErrors.yearOfStudy = 'Required';
+    if (!formData.confirmation) newErrors.confirmation = 'You must confirm';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setStatus('loading');
+
+    try {
+      const response = await fetch('/api/form/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200 || response.status === 201) {
+        if (data.eligible) {
+          setStatus('success-eligible');
+        } else {
+          setStatus('success-stored');
+        }
+      } else if (response.status === 409 || data.message?.toLowerCase().includes('already')) {
+        setStatus('duplicate');
+      } else {
+        setStatus('error');
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+      setStatus('error');
+    }
+  };
+
+  const renderFeedback = () => {
+    if (status === 'idle' || status === 'loading') return null;
+
+    let icon, title, message, typeClass;
+
+    switch (status) {
+      case 'success-eligible':
+        icon = <CheckCircle2 size={48} />;
+        title = "Awesome!";
+        message = "Your certificate has been sent to your email.";
+        typeClass = "success";
+        break;
+      case 'success-stored':
+        icon = <CheckCircle2 size={48} />;
+        title = "Received!";
+        message = "Thank you! Your response has been recorded.";
+        typeClass = "success";
+        break;
+      case 'duplicate':
+        icon = <AlertCircle size={48} />;
+        title = "Already Done";
+        message = "You have already submitted this form.";
+        typeClass = "error";
+        break;
+      case 'error':
+      default:
+        icon = <AlertCircle size={48} />;
+        title = "Oops!";
+        message = "Something went wrong. Please try again.";
+        typeClass = "error";
+        break;
+    }
+
+    return (
+      <div className="feedback-overlay">
+        <div className={`feedback-icon ${typeClass}`}>
+          {icon}
+        </div>
+        <h2 className="feedback-title">{title}</h2>
+        <p className="feedback-message">{message}</p>
+        {(status === 'error' || status === 'duplicate') && (
+          <button className="btn-secondary" onClick={() => setStatus('idle')}>
+            Try Again
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="registration-container">
+      <div className="registration-card">
+        {renderFeedback()}
+        
+        <div className="registration-header">
+          <h1>Webinar Registration</h1>
+          <p>Please fill in your details to receive your certificate</p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">Full Name *</label>
+            <input
+              type="text"
+              name="fullName"
+              className={`registration-input ${errors.fullName ? 'error' : ''}`}
+              placeholder="e.g. John Doe"
+              value={formData.fullName}
+              onChange={handleChange}
+              disabled={status === 'loading'}
+            />
+            {errors.fullName && <span className="error-text">{errors.fullName}</span>}
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Email Address *</label>
+              <input
+                type="email"
+                name="email"
+                className={`registration-input ${errors.email ? 'error' : ''}`}
+                placeholder="john@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              />
+              {errors.email && <span className="error-text">{errors.email}</span>}
+            </div>
+            <div className="form-group">
+              <label className="form-label">Phone Number *</label>
+              <input
+                type="tel"
+                name="phone"
+                className={`registration-input ${errors.phone ? 'error' : ''}`}
+                placeholder="10-digit number"
+                value={formData.phone}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              />
+              {errors.phone && <span className="error-text">{errors.phone}</span>}
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">College Name *</label>
+            <input
+              type="text"
+              name="collegeName"
+              className={`registration-input ${errors.collegeName ? 'error' : ''}`}
+              placeholder="Your college name"
+              value={formData.collegeName}
+              onChange={handleChange}
+              disabled={status === 'loading'}
+            />
+            {errors.collegeName && <span className="error-text">{errors.collegeName}</span>}
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Department *</label>
+              <input
+                type="text"
+                name="department"
+                className={`registration-input ${errors.department ? 'error' : ''}`}
+                placeholder="e.g. CSE"
+                value={formData.department}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              />
+              {errors.department && <span className="error-text">{errors.department}</span>}
+            </div>
+            <div className="form-group">
+              <label className="form-label">Year of Study *</label>
+              <select
+                name="yearOfStudy"
+                className={`registration-input ${errors.yearOfStudy ? 'error' : ''}`}
+                value={formData.yearOfStudy}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              >
+                <option value="">Select Year</option>
+                <option value="1st">1st Year</option>
+                <option value="2nd">2nd Year</option>
+                <option value="3rd">3rd Year</option>
+                <option value="4th">4th Year</option>
+              </select>
+              {errors.yearOfStudy && <span className="error-text">{errors.yearOfStudy}</span>}
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">CR Name (Optional)</label>
+              <input
+                type="text"
+                name="crName"
+                className="registration-input"
+                placeholder="Class Representative"
+                value={formData.crName}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">CR Phone (Optional)</label>
+              <input
+                type="tel"
+                name="crPhone"
+                className="registration-input"
+                placeholder="CR's Phone"
+                value={formData.crPhone}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Friend Name (Optional)</label>
+            <input
+              type="text"
+              name="friendName"
+              className="registration-input"
+              placeholder="Refer a friend"
+              value={formData.friendName}
+              onChange={handleChange}
+              disabled={status === 'loading'}
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Friend's College (Optional)</label>
+              <input
+                type="text"
+                name="friendCollege"
+                className="registration-input"
+                placeholder="Friend's college"
+                value={formData.friendCollege}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Friend's Mobile (Optional)</label>
+              <input
+                type="tel"
+                name="friendPhone"
+                className="registration-input"
+                placeholder="Friend's phone"
+                value={formData.friendPhone}
+                onChange={handleChange}
+                disabled={status === 'loading'}
+              />
+            </div>
+          </div>
+
+          <div className="checkbox-group" onClick={() => !status === 'loading' && handleChange({ target: { name: 'confirmation', type: 'checkbox', checked: !formData.confirmation } })}>
+            <input
+              type="checkbox"
+              name="confirmation"
+              checked={formData.confirmation}
+              onChange={handleChange}
+              disabled={status === 'loading'}
+              onClick={(e) => e.stopPropagation()}
+            />
+            <label className="checkbox-label">
+              I confirm that the details provided are correct and I am eligible for the certificate.
+            </label>
+          </div>
+          {errors.confirmation && <p className="error-text" style={{ marginTop: '-24px', marginBottom: '24px', marginLeft: '40px' }}>{errors.confirmation}</p>}
+
+          <button 
+            type="submit" 
+            className="submit-btn" 
+            disabled={status === 'loading'}
+          >
+            {status === 'loading' ? (
+              <>
+                <Loader2 className="loader" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Send size={18} />
+                Submit Details
+              </>
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default StudentRegistrationForm;
