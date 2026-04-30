@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Link as LinkIcon, Copy, Plus, Trash2, CheckCircle2, ExternalLink } from 'lucide-react';
 
-const API_BASE = 'http://192.168.1.7:8080';
-
 const WebinarManagement = () => {
   const [webinars, setWebinars] = useState([]);
   const [formData, setFormData] = useState({
@@ -22,7 +20,7 @@ const WebinarManagement = () => {
 
   const fetchWebinars = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/webinars`);
+      const response = await fetch('/api/webinars');
       if (response.ok) {
         const data = await response.json();
         setWebinars(data);
@@ -43,7 +41,7 @@ const WebinarManagement = () => {
     setGeneratedLink('');
 
     try {
-      const response = await fetch(`${API_BASE}/api/webinars/create`, {
+      const response = await fetch('/api/webinars/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
