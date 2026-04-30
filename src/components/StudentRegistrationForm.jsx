@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Loader2, Send, Calendar } from 'lucide-react';
 import './StudentRegistrationForm.css';
 
+const API_BASE = 'http://192.168.1.7:8080';
+
 const StudentRegistrationForm = () => {
   const [searchParams] = useSearchParams();
   const webinarId = searchParams.get('webinarId');
@@ -29,7 +31,7 @@ const StudentRegistrationForm = () => {
 
   useEffect(() => {
     if (webinarId) {
-      fetch(`/api/webinars/${webinarId}`)
+      fetch(`${API_BASE}/api/webinars/${webinarId}`)
         .then(res => {
           if (res.ok) return res.json();
           throw new Error('Failed to fetch webinar details');
@@ -80,7 +82,7 @@ const StudentRegistrationForm = () => {
     setStatus('loading');
 
     try {
-      const response = await fetch('/api/form/submit', {
+      const response = await fetch(`${API_BASE}/api/form/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
