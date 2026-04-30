@@ -59,6 +59,21 @@ const Header = ({ activeTab, setActiveTab, searchQuery, setSearchQuery }) => {
           Generate
         </button>
         <button
+          onClick={() => setActiveTab('webinars')}
+          style={{
+            padding: '10px 24px',
+            borderRadius: '8px',
+            fontWeight: '600',
+            fontSize: '0.95rem',
+            background: activeTab === 'webinars' ? '#ffffff' : 'transparent',
+            color: activeTab === 'webinars' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'webinars' ? '0 2px 10px rgba(0,0,0,0.05)' : 'none',
+            transition: 'var(--transition-smooth)'
+          }}
+        >
+          Webinars
+        </button>
+        <button
           onClick={() => setActiveTab('tracking')}
           style={{
             padding: '10px 24px',

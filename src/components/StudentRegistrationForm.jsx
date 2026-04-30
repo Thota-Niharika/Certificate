@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, Send } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { CheckCircle2, AlertCircle, Loader2, Send, Calendar } from 'lucide-react';
 import './StudentRegistrationForm.css';
 
 const StudentRegistrationForm = () => {
+  const [searchParams] = useSearchParams();
+  const webinarId = searchParams.get('webinarId');
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -15,11 +19,25 @@ const StudentRegistrationForm = () => {
     friendName: '',
     friendCollege: '',
     friendPhone: '',
-    confirmation: false
+    confirmation: false,
+    webinarId: webinarId || ''
   });
 
-  const [status, setStatus] = useState('idle'); // idle, loading, success-eligible, success-stored, error, duplicate
+  const [status, setStatus] = useState(webinarId ? 'idle' : 'no-webinar'); // idle, loading, success, error, duplicate, expired, no-webinar
   const [errors, setErrors] = useState({});
+  const [webinarDetails, setWebinarDetails] = useState(null);
+
+  useEffect(() => {
+    if (webinarId) {
+      fetch(`/api/webinars/${webinarId}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to fetch webinar details');
+        })
+        .then(data => setWebinarDetails(data))
+        .catch(err => console.error('Error fetching webinar details:', err));
+    }
+  }, [webinarId]);
 
   const validate = () => {
     const newErrors = {};
@@ -65,19 +83,20 @@ const StudentRegistrationForm = () => {
       const response = await fetch('/api/form/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          webinarId: parseInt(formData.webinarId)
+        })
       });
 
       const data = await response.json();
 
-      if (response.status === 200 || response.status === 201) {
-        if (data.eligible) {
-          setStatus('success-eligible');
-        } else {
-          setStatus('success-stored');
-        }
-      } else if (response.status === 409 || data.message?.toLowerCase().includes('already')) {
+      if (response.ok) {
+        setStatus('success');
+      } else if (response.status === 409 || (data.message && data.message.toLowerCase().includes('already'))) {
         setStatus('duplicate');
+      } else if (response.status === 410 || (data.message && data.message.toLowerCase().includes('expired'))) {
+        setStatus('expired');
       } else {
         setStatus('error');
       }
@@ -93,29 +112,35 @@ const StudentRegistrationForm = () => {
     let icon, title, message, typeClass;
 
     switch (status) {
-      case 'success-eligible':
+      case 'success':
         icon = <CheckCircle2 size={48} />;
-        title = "Awesome!";
-        message = "Your certificate has been sent to your email.";
-        typeClass = "success";
-        break;
-      case 'success-stored':
-        icon = <CheckCircle2 size={48} />;
-        title = "Received!";
-        message = "Thank you! Your response has been recorded.";
+        title = "Registration Successful!";
+        message = "Your certificate is being generated and will be sent to your email shortly.";
         typeClass = "success";
         break;
       case 'duplicate':
         icon = <AlertCircle size={48} />;
-        title = "Already Done";
-        message = "You have already submitted this form.";
+        title = "Already Submitted";
+        message = "You have already registered for this webinar.";
+        typeClass = "error";
+        break;
+      case 'expired':
+        icon = <AlertCircle size={48} />;
+        title = "Form Expired";
+        message = "This webinar registration form is no longer accepting responses.";
+        typeClass = "error";
+        break;
+      case 'no-webinar':
+        icon = <AlertCircle size={48} />;
+        title = "Missing Webinar ID";
+        message = "Please use the official link provided to register for a webinar.";
         typeClass = "error";
         break;
       case 'error':
       default:
         icon = <AlertCircle size={48} />;
         title = "Oops!";
-        message = "Something went wrong. Please try again.";
+        message = "Something went wrong. Please check your connection and try again.";
         typeClass = "error";
         break;
     }
@@ -127,9 +152,9 @@ const StudentRegistrationForm = () => {
         </div>
         <h2 className="feedback-title">{title}</h2>
         <p className="feedback-message">{message}</p>
-        {(status === 'error' || status === 'duplicate') && (
-          <button className="btn-secondary" onClick={() => setStatus('idle')}>
-            Try Again
+        {(status === 'error' || status === 'no-webinar') && (
+          <button className="btn-secondary" onClick={() => status !== 'no-webinar' && setStatus('idle')}>
+            {status === 'no-webinar' ? 'Go to Home' : 'Try Again'}
           </button>
         )}
       </div>
@@ -142,11 +167,30 @@ const StudentRegistrationForm = () => {
         {renderFeedback()}
         
         <div className="registration-header">
-          <h1>Webinar Registration</h1>
-          <p>Please fill in your details to receive your certificate</p>
+          <h1>{webinarDetails ? (webinarDetails.webinarTitle || webinarDetails.title || 'Webinar Registration') : 'Webinar Registration'}</h1>
+          <p>
+            {webinarDetails && webinarDetails.eventDate ? (
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Calendar size={16} /> {webinarDetails.eventDate}
+              </span>
+            ) : 'Please fill in your details to receive your certificate'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
+          {webinarDetails && (webinarDetails.webinarTitle || webinarDetails.title) && (
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-label" style={{ color: 'var(--accent-primary)' }}>Registering For Webinar</label>
+              <input
+                type="text"
+                className="registration-input"
+                value={webinarDetails.webinarTitle || webinarDetails.title}
+                disabled
+                style={{ background: 'var(--bg-secondary)', fontWeight: '600', color: 'var(--text-primary)' }}
+              />
+            </div>
+          )}
+
           <div className="form-group">
             <label className="form-label">Full Name *</label>
             <input

@@ -6,6 +6,7 @@ import TrackingDashboard from './components/TrackingDashboard';
 import GLogoCertificateTemplate from './components/GLogoCertificateTemplate';
 import SingleGenerationForm from './components/SingleGenerationForm';
 import StudentRegistrationForm from './components/StudentRegistrationForm';
+import WebinarManagement from './components/WebinarManagement';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/registration" element={<StudentRegistrationForm />} />
+        <Route path="/registration/form" element={<StudentRegistrationForm />} />
         <Route path="/admin" element={
           <div className="app-container">
             <div className="main-content" style={{ maxWidth: activeTab === 'generate' ? '1400px' : '1200px' }}>
@@ -77,6 +78,10 @@ function App() {
                     </div>
 
                   </div>
+                </div>
+              ) : activeTab === 'webinars' ? (
+                <div>
+                  <WebinarManagement />
                 </div>
               ) : (
                 <div>
