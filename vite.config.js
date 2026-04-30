@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  appType: 'spa',
   server: {
     host: true, // Exposes the server on the local network
     proxy: {
@@ -24,6 +25,15 @@ export default defineConfig({
           });
         },
       },
+    },
+    // Custom middleware to handle MIME types for .jsx files on Windows if needed
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url && req.url.endsWith('.jsx')) {
+          res.setHeader('Content-Type', 'application/javascript');
+        }
+        next();
+      });
     },
   },
 })
