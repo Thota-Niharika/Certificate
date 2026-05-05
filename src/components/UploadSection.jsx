@@ -61,14 +61,14 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
       {/* Top Header & Buttons */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
+      <div className="upload-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '4px' }}>Designer Workspace</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            Upload CSV with columns: <code style={{ color: 'var(--accent-primary)', fontWeight: '600' }}>studentName, email, webinarName, issueDate, certificateId</code>
+            Upload CSV with columns: <code style={{ color: 'var(--accent-primary)', fontWeight: '600' }}>StudentName, WebinarName, Email</code>
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-end' }} className="upload-buttons">
           <button 
             onClick={() => templateInputRef.current?.click()}
             className="btn-secondary"
@@ -125,11 +125,9 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
             </div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               {[
-                { label: 'studentName', aliases: ['studentName', 'name', 'recipient', 'participant'] },
-                { label: 'email', aliases: ['email', 'mail', 'email address'] },
-                { label: 'webinarName', aliases: ['webinarName', 'webinar', 'course', 'event'] },
-                { label: 'issueDate', aliases: ['issueDate', 'date', 'issued'] },
-                { label: 'certificateId', aliases: ['certificateId', 'certId', 'id'] }
+                { label: 'StudentName', aliases: ['studentName', 'name', 'recipient', 'participant'] },
+                { label: 'WebinarName', aliases: ['webinarName', 'webinar', 'course', 'event'] },
+                { label: 'Email', aliases: ['email', 'mail', 'email address'] }
               ].map(col => {
                 const exists = Object.keys(csvData[0]).some(k => 
                   col.aliases.some(a => k.toLowerCase().includes(a.toLowerCase()))
@@ -152,21 +150,17 @@ const UploadSection = ({ csvFile, setCsvFile, templateFile, setTemplateFile }) =
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
               <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-secondary)' }}>
                 <tr>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Name</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Student Name</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Webinar Name</th>
                   <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Email</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Webinar</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Issue Date</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Cert ID</th>
                 </tr>
               </thead>
               <tbody>
                 {csvData.slice(0, 3).map((row, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid rgba(0,0,0,0.02)' }}>
-                    <td style={{ padding: '10px 12px' }}>{getField(row, 'studentName', 'name', 'recipient')}</td>
-                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{getField(row, 'email', 'mail')}</td>
-                    <td style={{ padding: '10px 12px', fontStyle: 'italic' }}>{getField(row, 'webinarName', 'webinar', 'course')}</td>
-                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{getField(row, 'issueDate', 'date', 'issued')}</td>
-                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{getField(row, 'certificateId', 'certId', 'id')}</td>
+                    <td style={{ padding: '10px 12px' }}>{getField(row, 'StudentName', 'studentName', 'name')}</td>
+                    <td style={{ padding: '10px 12px', fontStyle: 'italic' }}>{getField(row, 'WebinarName', 'webinarName', 'webinar')}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>{getField(row, 'Email', 'email', 'mail')}</td>
                   </tr>
                 ))}
               </tbody>

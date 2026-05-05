@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Loader2, Send, Calendar, XCircle } from 'lucide-react';
 import './StudentRegistrationForm.css';
 
-const API_BASE = 'http://192.168.1.7:8080';
+const API_BASE = 'http://192.168.1.30:8080';
 
 const StudentRegistrationForm = () => {
   const [searchParams] = useSearchParams();
@@ -31,7 +31,7 @@ const StudentRegistrationForm = () => {
 
   useEffect(() => {
     if (webinarId) {
-      fetch(`${API_BASE}/api/webinars/${webinarId}`)
+      fetch(`/api/webinars/${webinarId}`)
         .then(res => {
           if (res.ok) return res.json();
           throw new Error('Failed to fetch webinar details');
@@ -82,12 +82,19 @@ const StudentRegistrationForm = () => {
     setStatus('loading');
 
     try {
-      const response = await fetch(`${API_BASE}/api/form/submit`, {
+      const response = await fetch('/api/form/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          webinarId: parseInt(formData.webinarId)
+          webinarId: parseInt(formData.webinarId),
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          collegeName: formData.collegeName,
+          department: formData.department,
+          yearOfStudy: formData.yearOfStudy,
+          referralSource: formData.crName || formData.friendName || 'Direct',
+          confirmation: formData.confirmation // Added to match DTO
         })
       });
 
@@ -143,11 +150,17 @@ const StudentRegistrationForm = () => {
         message = "This webinar registration form is no longer accepting responses.";
         typeClass = "error";
         break;
+      case 'no-webinar':
+        icon = <AlertCircle size={48} />;
+        title = "No Webinar Selected";
+        message = "Please use the specific link provided for your webinar registration.";
+        typeClass = "error";
+        break;
       case 'error':
       default:
         icon = <XCircle size={64} />;
         title = "Oops!";
-        message = "Something went wrong. Please check your connection and try again.";
+        message = "Something went wrong. Please check your connection to the server at 192.168.1.30 and try again.";
         typeClass = "error";
         break;
     }

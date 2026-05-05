@@ -6,7 +6,9 @@ import isoNewBadge from '../assets/iso-new-badge.png';
 import { STATUS, normalizeBackendRecord } from '../utils/statusUtils';
 import { startScheduler, stopScheduler } from '../services/schedulerService';
 
-const API_BASE = 'http://192.168.1.7:8080';
+import './TrackingDashboard.css';
+
+const API_BASE = 'http://192.168.1.30:8080';
 
 const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   // --- 1. STATE DEFINITIONS ---
@@ -34,7 +36,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
 
   const downloadCertificate = () => {
     if (!previewRecord) return;
-    const previewUrl = `${API_BASE}/api/certificates/preview/${previewRecord.id || previewRecord.certificateId}`;
+    const previewUrl = `/api/certificates/preview/${previewRecord.id || previewRecord.certificateId}`;
     const link = document.createElement("a");
     link.href = previewUrl;
     link.download = `Certificate_${previewRecord.name.replace(/\s+/g, '_')}.pdf`;
@@ -47,8 +49,8 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
     setError(null);
     try {
       const [logsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/certificates`),
-        fetch(`${API_BASE}/api/certificates/stats`)
+        fetch('/api/certificates'),
+        fetch('/api/certificates/stats')
       ]);
 
       // Read actual error body for better diagnostics on 500s
@@ -106,14 +108,14 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
 
       setLogs(normalizedLogs);
 
-      // Calculate missing stats from array if backend format changes, else rely on actual values
+      // Map to documented StatsResponse keys: totalCertificates, sentCertificates, failedCertificates
       setStats({
-        total: statsData.total || statsData.Total || 0,
-        sent: statsData.sent || statsData.Sent || 0,
-        pending: statsData.pending || statsData.Pending || 0,
-        processing: statsData.processing || statsData.Processing || 0,
-        retry: statsData.retry || statsData.retrying || statsData.Retrying || 0,
-        failed: statsData.failed || statsData.Failed || 0
+        total: statsData.totalCertificates || 0,
+        sent: statsData.sentCertificates || 0,
+        failed: statsData.failedCertificates || 0,
+        pending: statsData.pending || 0,
+        processing: statsData.processing || 0,
+        retry: statsData.retry || 0
       });
     } catch (err) {
       setError(err.message);
@@ -145,7 +147,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   const handleRetryFailed = async () => {
     setIsRetrying(true);
     try {
-      const response = await fetch(`${API_BASE}/api/certificates/retry-failed`, {
+      const response = await fetch('/api/certificates/retry-failed', {
         method: 'POST'
       });
       if (!response.ok) throw new Error('Retry failed');
@@ -162,7 +164,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
     // If backend supports per-ID retry later, replace this URL.
     setIsRetrying(true);
     try {
-      const response = await fetch(`${API_BASE}/api/certificates/retry-failed`, {
+      const response = await fetch('/api/certificates/retry-failed', {
         method: 'POST'
       });
       if (!response.ok) throw new Error('Retry failed');
@@ -224,7 +226,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   return (
     <div className="glass-panel" style={{ minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
       {/* KPI Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '32px' }}>
+      <div className="stats-grid">
         {[
           { label: 'Total Records', value: totals.all, icon: Award, color: 'var(--accent-primary)', bg: 'rgba(59, 130, 246, 0.08)' },
           { label: 'Sent', value: totals.sent, icon: CheckCircle, color: 'var(--accent-success)', bg: 'rgba(16, 185, 129, 0.08)' },
@@ -264,7 +266,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
       </div>
 
       {/* Header & Filters */}
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="dashboard-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
@@ -311,12 +313,12 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Zap size={14} color="var(--accent-primary)" />
-              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.7:8080</code>
+              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.30:8080</code>
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div className="dashboard-controls" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
 
           {/* Time Filter Dropdown */}
           <select
@@ -331,7 +333,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
           </select>
 
           {/* Status Filter Buttons */}
-          <div style={{ display: 'flex', gap: '6px', background: 'rgba(0,0,0,0.04)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.02)' }}>
+          <div className="filter-tabs" style={{ display: 'flex', gap: '6px', background: 'rgba(0,0,0,0.04)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.02)' }}>
             {[
               { id: 'all', label: 'All', color: 'var(--accent-primary)' },
               { id: STATUS.SENT, label: 'Sent', color: 'var(--accent-success)' },
@@ -363,7 +365,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
       </div>
 
       {/* Table */}
-      <div style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+      <div className="table-container">
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
             <Zap className="spin-animation" size={48} color="var(--accent-primary)" />
@@ -377,7 +379,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             <button className="btn-secondary" onClick={fetchData}>Try Again</button>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <table className="tracking-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '500' }}>Cert ID</th>
@@ -390,16 +392,16 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             <tbody>
               {filteredLogs.map((log) => (
                 <tr key={log.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', transition: 'var(--transition-smooth)' }}>
-                  <td style={{ padding: '16px', fontSize: '0.9rem', fontFamily: 'monospace' }}>{log.id}</td>
-                  <td style={{ padding: '16px' }}>
+                  <td data-label="Cert ID" style={{ padding: '16px', fontSize: '0.9rem', fontFamily: 'monospace' }}>{log.id}</td>
+                  <td data-label="Recipient" style={{ padding: '16px' }}>
                     <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>{log.name}</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{log.email}</div>
                   </td>
-                  <td style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <td data-label="Time & Date" style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{log.date}</div>
                     {log.time && <div style={{ fontSize: '0.8rem' }}>{log.time}</div>}
                   </td>
-                  <td style={{ padding: '16px' }}>
+                  <td data-label="Status" style={{ padding: '16px' }}>
                     {log.status === STATUS.PENDING ? (
                       <span className="badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(107, 114, 128, 0.1)', color: '#4b5563' }}>
                         <Clock size={12} /> Pending
@@ -440,7 +442,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '16px', textAlign: 'right' }}>
+                  <td data-label="Actions" style={{ padding: '16px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                       <button
                         onClick={() => setPreviewRecord(log)}
@@ -498,7 +500,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
               </div>
             )}
             <iframe
-              src={`${API_BASE}/api/certificates/preview/${previewRecord.id}`}
+              src={`/api/certificates/preview/${previewRecord.id}`}
               title="Certificate PDF Preview"
               onLoad={() => setIsPreviewLoading(false)}
               style={{

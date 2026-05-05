@@ -285,25 +285,55 @@
   font-weight: 600;
 }
 
-/* Mobile Adjustments */
+/* Mobile & Tablet Adjustments */
+@media (max-width: 768px) {
+  .registration-card {
+    padding: 28px 24px;
+    max-width: 100%;
+  }
+  
+  .feedback-card-inner {
+    padding: 32px 20px;
+  }
+  
+  .feedback-title {
+    font-size: 1.5rem;
+  }
+}
+
 @media (max-width: 480px) {
+  .registration-container {
+    padding: 0;
+    align-items: flex-start;
+    background: white;
+  }
+  
   .registration-card {
     padding: 24px 20px;
     border-radius: 0;
-    max-width: 100%;
     min-height: 100vh;
     border: none;
-  }
-  
-  .registration-container {
-    padding: 0;
+    box-shadow: none;
+    background: transparent;
+    backdrop-filter: none;
   }
   
   .form-row {
     grid-template-columns: 1fr;
+    gap: 0;
   }
   
   .registration-header h1 {
     font-size: 1.5rem;
+  }
+  
+  .submit-btn {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  
+  .checkbox-group {
+    margin-top: 16px;
+    margin-bottom: 24px;
   }
 }

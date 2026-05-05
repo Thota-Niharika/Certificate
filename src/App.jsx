@@ -19,9 +19,7 @@ function App() {
   const [singleData, setSingleData] = useState({
     studentName: '',
     webinarName: '',
-    email: '',
-    issueDate: '',
-    certificateId: ''
+    email: ''
   });
 
   return (
@@ -41,7 +39,7 @@ function App() {
                   <UploadSection csvFile={csvFile} setCsvFile={setCsvFile} templateFile={templateFile} setTemplateFile={setTemplateFile} />
 
                   {/* Bottom Row: Side-By-Side Issuance & Preview */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '420px 1fr', gap: '32px', alignItems: 'start' }}>
+                  <div className="stack-on-tablet" style={{ display: 'grid', gridTemplateColumns: '420px 1fr', gap: '32px', alignItems: 'start' }}>
                     
                     {/* Left Side: Single Candidate Form & Bulk Action */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -61,8 +59,8 @@ function App() {
                             <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-success)', fontSize: '0.75rem' }}>Live Sync</span>
                           </div>
                         </div>
-                        <div style={{ flex: 1, padding: '24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'rgba(255,255,255,0.2)' }}>
-                          <div style={{ width: '100%', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ flex: 1, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.2)' }}>
+                          <div style={{ width: '100%', maxWidth: '100%', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', borderRadius: '4px', overflow: 'hidden' }}>
                             <GLogoCertificateTemplate 
                               studentName={singleData.studentName || "Candidate Name"}
                               courseName={singleData.webinarName || "Webinar / Course Name"}

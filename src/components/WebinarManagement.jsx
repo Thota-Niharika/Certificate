@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Link as LinkIcon, Copy, Plus, Trash2, CheckCircle2, ExternalLink } from 'lucide-react';
 
-const API_BASE = 'http://192.168.1.7:8080';
+import './WebinarManagement.css';
+
+const API_BASE = 'http://192.168.1.30:8080';
 
 const WebinarManagement = () => {
   const [webinars, setWebinars] = useState([]);
@@ -22,7 +24,7 @@ const WebinarManagement = () => {
 
   const fetchWebinars = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/webinars`);
+      const response = await fetch('/api/webinars');
       if (response.ok) {
         const data = await response.json();
         setWebinars(data);
@@ -43,7 +45,7 @@ const WebinarManagement = () => {
     setGeneratedLink('');
 
     try {
-      const response = await fetch(`${API_BASE}/api/webinars/create`, {
+      const response = await fetch('/api/webinars/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,10 +91,10 @@ const WebinarManagement = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <div className="grid-layout" style={{ gridTemplateColumns: '450px 1fr' }}>
+      <div className="webinar-grid">
         
         {/* Left Side: Creation Form */}
-        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="glass-panel webinar-form-panel" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Plus size={20} style={{ color: 'var(--accent-primary)' }} />
@@ -220,8 +222,8 @@ const WebinarManagement = () => {
             </span>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div>
+            <table className="webinar-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--bg-secondary)' }}>
                   <th style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>WEBINAR DETAILS</th>
@@ -239,15 +241,15 @@ const WebinarManagement = () => {
                 ) : (
                   webinars.map((webinar) => (
                     <tr key={webinar.id} style={{ borderBottom: '1px solid var(--bg-secondary)', transition: 'background 0.2s' }}>
-                      <td style={{ padding: '16px' }}>
+                      <td data-label="Webinar" style={{ padding: '16px' }}>
                         <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{webinar.webinarTitle || webinar.title || 'Untitled Webinar'}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>ID: {webinar.id}</div>
                       </td>
-                      <td style={{ padding: '16px' }}>
+                      <td data-label="Schedule" style={{ padding: '16px' }}>
                         <div style={{ fontSize: '0.9rem' }}>{webinar.eventDate}</div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{webinar.startTime} - {webinar.endTime}</div>
                       </td>
-                      <td style={{ padding: '16px' }}>
+                      <td data-label="Actions" style={{ padding: '16px' }}>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button 
                             className="btn-secondary" 

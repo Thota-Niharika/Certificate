@@ -1,19 +1,13 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import logo from '../assets/gy1-png.png';
+import './Header.css';
 
 const Header = ({ activeTab, setActiveTab, searchQuery, setSearchQuery }) => {
   return (
-    <header className="glass-panel" style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '2rem',
-      padding: '16px 24px',
-      gap: '24px'
-    }}>
+    <header className="glass-panel header-container">
       {/* Brand */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+      <div className="header-brand">
         <div style={{
           background: 'rgba(255,255,255,0.8)',
           padding: '6px',
@@ -35,14 +29,7 @@ const Header = ({ activeTab, setActiveTab, searchQuery, setSearchQuery }) => {
       </div>
 
       {/* Navigation */}
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        background: 'rgba(0,0,0,0.03)',
-        padding: '6px',
-        borderRadius: '12px',
-        border: '1px solid rgba(0,0,0,0.03)'
-      }}>
+      <div className="header-nav">
         <button
           onClick={() => setActiveTab('generate')}
           style={{
@@ -91,8 +78,8 @@ const Header = ({ activeTab, setActiveTab, searchQuery, setSearchQuery }) => {
       </div>
 
       {/* Search Bar */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-        <div style={{ position: 'relative', maxWidth: '300px', width: '100%' }}>
+      <div className="header-search">
+        <div className="search-wrapper">
           <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}>
             <Search size={18} />
           </div>

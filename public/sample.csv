@@ -1,3 +1,4 @@
-name,email,webinarName,issueDate,certificateId
-Raghu Vamshi,raghuvamshi.h@futureinvo.com,React JS Masterclass,25-04-2026,GTAWP001
-HR,hr@futureinvo.com,React JS Masterclass,25-04-2026,GTAWP002
+StudentName,WebinarName,Email
+John Doe,Spring Boot Basics,john@example.com
+Jane Smith,Java Masterclass,jane@example.com
+Mike Johnson,Microservices Architecture,mike@example.com
