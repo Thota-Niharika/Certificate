@@ -49,10 +49,10 @@ const WebinarManagement = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: formData.title,
+          webinarTitle: formData.title,
           eventDate: formData.eventDate,
-          startTime: formData.startTime,
-          endTime: formData.endTime
+          startTime: formData.startTime.length === 5 ? `${formData.startTime}:00` : formData.startTime,
+          endTime: formData.endTime.length === 5 ? `${formData.endTime}:00` : formData.endTime
         })
       });
 
