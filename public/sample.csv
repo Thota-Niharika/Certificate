@@ -1,4 +1,4 @@
-StudentName,WebinarName,Email
-John Doe,Spring Boot Basics,john@example.com
-Jane Smith,Java Masterclass,jane@example.com
-Mike Johnson,Microservices Architecture,mike@example.com
+Timestamp,Email Address,FULL NAME FOR CERTIFICATE,PHONE NUMBER,EMAIL ID,COLLEGE NAME,COURSE NAME,REFERENCE FRIEND NAME,REFERENCE FRIEND PHONE NUMBER
+5/3/2026 19:23,pravalika@gmail.com,Pravalika Bandela,9876543210,pravalika@gmail.com,Presidency School of Management,MBA,Shazia,9876543211
+5/3/2026 19:23,niharika@gmail.com,Niharika K,6287098166,niharika@gmail.com,Unity PG College,MBA,Kranthi,917999782166
+5/3/2026 19:23,bandela@gmail.com,Bandela Pravalika,9390123456,bandela@gmail.com,Presidency School of Management and Computer Science,MBA,College,-

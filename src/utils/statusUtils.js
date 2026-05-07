@@ -45,9 +45,9 @@ const getNorm = (obj, ...keys) => {
 export const normalizeBackendRecord = (log) => {
   // Extract fields using normalized keys
   const id = getNorm(log, 'certificateId', 'certificateCode', 'certId', 'id');
-  const name = getNorm(log, 'studentName', 'name', 'recipientName', 'recipient');
-  const email = getNorm(log, 'email', 'mail');
-  const dateStr = log.issueDate || log.date || '-';
+  const name = getNorm(log, 'fullNameForCertificate', 'fullName', 'studentName', 'name', 'recipientName', 'recipient');
+  const email = getNorm(log, 'emailAddress', 'email', 'mail');
+  const dateStr = log.timestamp || log.issueDate || log.date || '-';
   const webinarName = getNorm(log, 'webinarName', 'webinar', 'courseName', 'course');
   let retryCount = log.retryCount || 0;
   const errorMessage = log.errorMessage || null;

@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import { Send, Zap, AlertCircle } from 'lucide-react';
 
-const API_BASE = 'http://192.168.1.30:8080';
+const API_BASE = 'http://192.168.1.14:8080';
 
 const ConfigurationPanel = ({ csvFile, setActiveTab }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorStatus, setErrorStatus] = useState(null);
+  const [batchWebinarName, setBatchWebinarName] = useState('');
 
   const handleGenerate = async () => {
     if (!csvFile) {
       setErrorStatus("Please upload a CSV file to proceed.");
+      return;
+    }
+    
+    if (!batchWebinarName.trim()) {
+      setErrorStatus("Please enter a Webinar Name/Topic.");
       return;
     }
     
@@ -19,9 +25,11 @@ const ConfigurationPanel = ({ csvFile, setActiveTab }) => {
     // Prepare FormData
     const formData = new FormData();
     formData.append('file', csvFile);
+    formData.append('webinarName', batchWebinarName);
 
     try {
-      const response = await fetch('/api/certificates/upload', {
+      // Using relative path to leverage Vite proxy
+      const response = await fetch('/api/certificates/upload-csv', {
         method: 'POST',
         body: formData,
       });
@@ -52,6 +60,24 @@ const ConfigurationPanel = ({ csvFile, setActiveTab }) => {
           {errorStatus}
         </div>
       )}
+
+      {/* Webinar Name Input */}
+      <div style={{ marginBottom: '20px' }}>
+        <label className="form-label" style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+          Webinar Name / Topic *
+        </label>
+        <input 
+          type="text" 
+          className="input-field" 
+          placeholder="e.g. Masterclass on AI Strategy" 
+          value={batchWebinarName}
+          onChange={(e) => setBatchWebinarName(e.target.value)}
+          style={{ width: '100%', padding: '12px 16px' }}
+        />
+        <p style={{ marginTop: '6px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          This name will appear on all certificates generated from the uploaded CSV.
+        </p>
+      </div>
 
       {/* Action Button */}
       <div>

@@ -488,10 +488,10 @@
 //             {/* Footer signatures */}
 //             <div className="cert-footer">
 //               <div className="sig-block">
-//                 <div className="sig-img">N. Meghana</div>
+//                 <div className="sig-img">N. Surya</div>
 //                 <div className="sig-line" />
-//                 <div className="sig-name">N. MEGHANA</div>
-//                 <div className="sig-role">Asst. Operations Manager</div>
+//                 <div className="sig-name">N. SURYA</div>
+//                 <div className="sig-role">Operational Manager</div>
 //               </div>
 
 //               <div className="logo-center">
@@ -1057,10 +1057,10 @@ export default function Certificate() {
             {/* Footer signatures */}
             <div className="cert-footer">
               <div className="sig-block">
-                <div className="sig-img">N. Meghana</div>
+                <div className="sig-img">N. Surya</div>
                 <div className="sig-line" />
-                <div className="sig-name">N. MEGHANA</div>
-                <div className="sig-role">Asst. Operations Manager</div>
+                <div className="sig-name">N. SURYA</div>
+                <div className="sig-role">Operational Manager</div>
               </div>
 
               <div className="logo-center">

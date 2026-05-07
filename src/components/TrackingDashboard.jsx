@@ -8,7 +8,7 @@ import { startScheduler, stopScheduler } from '../services/schedulerService';
 
 import './TrackingDashboard.css';
 
-const API_BASE = 'http://192.168.1.30:8080';
+const API_BASE = 'http://192.168.1.14:8080';
 
 const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   // --- 1. STATE DEFINITIONS ---
@@ -74,12 +74,24 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
         // Helper to parse dates including DD-MM-YYYY
         const parseDate = (dStr) => {
           if (!dStr || dStr === '-') return NaN;
+          
+          // Try standard parsing first
           let d = new Date(dStr);
           if (!isNaN(d)) return d.getTime();
-          const parts = dStr.split('-');
-          if (parts.length === 3 && parts[2].length === 4) {
-            d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-            if (!isNaN(d)) return d.getTime();
+          
+          // Handle DD-MM-YYYY or DD/MM/YYYY
+          const parts = dStr.split(/[-/]/);
+          if (parts.length >= 3) {
+            // Assume DD-MM-YYYY if the third part is 4 digits
+            if (parts[2].length === 4) {
+              d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+              if (!isNaN(d)) return d.getTime();
+            }
+            // Assume YYYY-MM-DD if the first part is 4 digits
+            if (parts[0].length === 4) {
+              d = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+              if (!isNaN(d)) return d.getTime();
+            }
           }
           return NaN;
         };
@@ -107,16 +119,27 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
       });
 
       setLogs(normalizedLogs);
-
-      // Map to documented StatsResponse keys: totalCertificates, sentCertificates, failedCertificates
-      setStats({
-        total: statsData.totalCertificates || 0,
-        sent: statsData.sentCertificates || 0,
-        failed: statsData.failedCertificates || 0,
-        pending: statsData.pending || 0,
-        processing: statsData.processing || 0,
-        retry: statsData.retry || 0
-      });
+      
+      // Update stats based on the summary object if provided, else use legacy keys
+      if (statsData.summary) {
+        setStats({
+          total: statsData.summary.TOTAL || 0,
+          sent: statsData.summary.SENT || 0,
+          failed: statsData.summary.FAILED || 0,
+          pending: statsData.summary.PENDING || 0,
+          processing: statsData.summary.PROCESSING || 0,
+          retry: statsData.summary.RETRY || 0
+        });
+      } else {
+        setStats({
+          total: statsData.totalCertificates || 0,
+          sent: statsData.sentCertificates || 0,
+          failed: statsData.failedCertificates || 0,
+          pending: statsData.pending || 0,
+          processing: statsData.processing || 0,
+          retry: statsData.retry || 0
+        });
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error fetching dashboard data:', err);
@@ -313,7 +336,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Zap size={14} color="var(--accent-primary)" />
-              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.30:8080</code>
+              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.14:8080</code>
             </p>
           </div>
         </div>

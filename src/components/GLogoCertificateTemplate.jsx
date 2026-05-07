@@ -181,10 +181,10 @@ const GLogoCertificateTemplate = ({
               {/* Signatures */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "22px" }}>
                 <div style={{ textAlign: "center", width: "200px" }}>
-                  <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: "25px", color: "#0a2540", marginBottom: "10px" }}>N. Meghana</div>
+                  <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: "25px", color: "#0a2540", marginBottom: "10px" }}>N. Surya</div>
                   <div style={{ width: "150px", margin: "0 auto", borderTop: "1.5px solid #222", paddingTop: "8px" }}>
-                    <div style={{ fontWeight: "700", fontSize: "12px", color: "#0d1b3e" }}>N. MEGHANA</div>
-                    <div style={{ fontSize: "11px", color: "#444" }}>Asst. Operations Manager</div>
+                    <div style={{ fontWeight: "700", fontSize: "12px", color: "#0d1b3e" }}>N. SURYA</div>
+                    <div style={{ fontSize: "11px", color: "#444" }}>Operational Manager</div>
                   </div>
                 </div>
                 <div style={{ textAlign: "center" }}>
