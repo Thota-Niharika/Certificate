@@ -8,7 +8,7 @@ import { startScheduler, stopScheduler } from '../services/schedulerService';
 
 import './TrackingDashboard.css';
 
-const API_BASE = 'http://192.168.1.14:8080';
+const API_BASE = 'http://192.168.3.111:8080';
 
 const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   // --- 1. STATE DEFINITIONS ---
@@ -49,8 +49,8 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
     setError(null);
     try {
       const [logsRes, statsRes] = await Promise.all([
-        fetch('/api/certificates'),
-        fetch('/api/certificates/stats')
+        fetch(`${API_BASE}/api/certificates`),
+        fetch(`${API_BASE}/api/certificates/stats`)
       ]);
 
       // Read actual error body for better diagnostics on 500s
@@ -74,11 +74,11 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
         // Helper to parse dates including DD-MM-YYYY
         const parseDate = (dStr) => {
           if (!dStr || dStr === '-') return NaN;
-          
+
           // Try standard parsing first
           let d = new Date(dStr);
           if (!isNaN(d)) return d.getTime();
-          
+
           // Handle DD-MM-YYYY or DD/MM/YYYY
           const parts = dStr.split(/[-/]/);
           if (parts.length >= 3) {
@@ -119,7 +119,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
       });
 
       setLogs(normalizedLogs);
-      
+
       // Update stats based on the summary object if provided, else use legacy keys
       if (statsData.summary) {
         setStats({
@@ -170,7 +170,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   const handleRetryFailed = async () => {
     setIsRetrying(true);
     try {
-      const response = await fetch('/api/certificates/retry-failed', {
+      const response = await fetch(`${API_BASE}/api/certificates/retry-failed`, {
         method: 'POST'
       });
       if (!response.ok) throw new Error('Retry failed');
@@ -187,7 +187,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
     // If backend supports per-ID retry later, replace this URL.
     setIsRetrying(true);
     try {
-      const response = await fetch('/api/certificates/retry-failed', {
+      const response = await fetch(`${API_BASE}/api/certificates/retry-failed`, {
         method: 'POST'
       });
       if (!response.ok) throw new Error('Retry failed');
@@ -336,7 +336,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Zap size={14} color="var(--accent-primary)" />
-              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.1.14:8080</code>
+              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>192.168.3.111:8080</code>
             </p>
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Mail, Award, Send, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
 import { isRetryable } from '../utils/statusUtils';
 
-const API_BASE = 'http://192.168.1.14:8080';
+const API_BASE = 'http://192.168.3.111:8080';
 
 const SingleGenerationForm = ({ onComplete, onDataChange }) => {
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const SingleGenerationForm = ({ onComplete, onDataChange }) => {
     setStatus(null);
 
     try {
-      const response = await fetch('/api/certificates/single', {
+      const response = await fetch(`${API_BASE}/api/certificates/single`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,9 +111,9 @@ const SingleGenerationForm = ({ onComplete, onDataChange }) => {
 
 
         {status && (
-          <div style={{ 
-            padding: '12px', 
-            borderRadius: '8px', 
+          <div style={{
+            padding: '12px',
+            borderRadius: '8px',
             fontSize: '0.85rem',
             display: 'flex',
             alignItems: 'center',
@@ -127,9 +127,9 @@ const SingleGenerationForm = ({ onComplete, onDataChange }) => {
           </div>
         )}
 
-        <button 
-          type="submit" 
-          className="btn-primary" 
+        <button
+          type="submit"
+          className="btn-primary"
           disabled={loading}
           style={{ padding: '12px', marginTop: '4px' }}
         >

@@ -3,7 +3,7 @@ import { Calendar, Clock, Link as LinkIcon, Copy, Plus, Trash2, CheckCircle2, Ex
 
 import './WebinarManagement.css';
 
-const API_BASE = 'http://192.168.1.14:8080';
+const API_BASE = 'http://192.168.3.111:8080';
 
 const WebinarManagement = () => {
   const [webinars, setWebinars] = useState([]);
@@ -24,7 +24,7 @@ const WebinarManagement = () => {
 
   const fetchWebinars = async () => {
     try {
-      const response = await fetch('/api/webinars');
+      const response = await fetch(`${API_BASE}/api/webinars`);
       if (response.ok) {
         const data = await response.json();
         setWebinars(data);
@@ -45,7 +45,7 @@ const WebinarManagement = () => {
     setGeneratedLink('');
 
     try {
-      const response = await fetch('/api/webinars/create', {
+      const response = await fetch(`${API_BASE}/api/webinars/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,10 +59,10 @@ const WebinarManagement = () => {
       if (response.ok) {
         const data = await response.json();
         setMessage({ type: 'success', text: 'Webinar created successfully!' });
-        
+
         // Robustly extract the new ID from common response structures
         const newId = data.id || data.webinarId || data.ID || (data.data && data.data.id) || (data.webinar && data.webinar.id);
-        
+
         if (newId) {
           // Construct the registration link
           const registrationUrl = `${window.location.origin}/registration/form?webinarId=${newId}`;
@@ -70,7 +70,7 @@ const WebinarManagement = () => {
         } else {
           setGeneratedLink('Error: Backend did not return the webinar ID. Please find the link in the Recent Webinars table below.');
         }
-        
+
         setFormData({ title: '', eventDate: '', startTime: '', endTime: '' });
         fetchWebinars();
       } else {
@@ -92,7 +92,7 @@ const WebinarManagement = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       <div className="webinar-grid">
-        
+
         {/* Left Side: Creation Form */}
         <div className="glass-panel webinar-form-panel" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
@@ -178,11 +178,11 @@ const WebinarManagement = () => {
           )}
 
           {generatedLink && (
-            <div style={{ 
-              marginTop: '8px', 
-              padding: '16px', 
-              background: 'rgba(59, 130, 246, 0.05)', 
-              borderRadius: '12px', 
+            <div style={{
+              marginTop: '8px',
+              padding: '16px',
+              background: 'rgba(59, 130, 246, 0.05)',
+              borderRadius: '12px',
               border: '1px solid rgba(59, 130, 246, 0.1)',
               display: 'flex',
               flexDirection: 'column',
@@ -197,9 +197,9 @@ const WebinarManagement = () => {
                   style={{ fontSize: '0.85rem', padding: '8px 12px' }}
                   value={generatedLink}
                 />
-                <button 
+                <button
                   onClick={() => copyToClipboard(generatedLink)}
-                  className="btn-secondary" 
+                  className="btn-secondary"
                   style={{ padding: '8px' }}
                   title="Copy to clipboard"
                 >
@@ -251,16 +251,16 @@ const WebinarManagement = () => {
                       </td>
                       <td data-label="Actions" style={{ padding: '16px' }}>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          <button 
-                            className="btn-secondary" 
+                          <button
+                            className="btn-secondary"
                             style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                             onClick={() => copyToClipboard(`${window.location.origin}/registration/form?webinarId=${webinar.id}`)}
                           >
                             <Copy size={14} style={{ marginRight: '4px' }} /> Link
                           </button>
-                          <a 
-                            href={`/registration/form?webinarId=${webinar.id}`} 
-                            target="_blank" 
+                          <a
+                            href={`/registration/form?webinarId=${webinar.id}`}
+                            target="_blank"
                             className="btn-secondary"
                             style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                           >
