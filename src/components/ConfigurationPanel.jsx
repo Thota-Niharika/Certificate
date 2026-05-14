@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Zap, AlertCircle } from 'lucide-react';
 
-const API_BASE = 'http://192.168.3.111:8080';
+const API_BASE = 'http://54.224.81.46:8080';
 
 const ConfigurationPanel = ({ csvFile, setActiveTab }) => {
   const [isGenerating, setIsGenerating] = useState(false);
