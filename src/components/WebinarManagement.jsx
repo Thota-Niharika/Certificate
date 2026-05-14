@@ -3,7 +3,7 @@ import { Calendar, Clock, Link as LinkIcon, Copy, Plus, Trash2, CheckCircle2, Ex
 
 import './WebinarManagement.css';
 
-const API_BASE = 'http://54.227.228.210:8080';
+const API_BASE = 'http://100.31.140.101:8081';
 
 const WebinarManagement = () => {
   const [webinars, setWebinars] = useState([]);

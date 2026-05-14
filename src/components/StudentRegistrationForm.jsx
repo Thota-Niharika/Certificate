@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Loader2, Send, Calendar, XCircle } from 'lucide-react';
 import './StudentRegistrationForm.css';
 
-const API_BASE = 'http://54.227.228.210:8080';
+const API_BASE = 'http://100.31.140.101:8081';
 
 const StudentRegistrationForm = () => {
   const [searchParams] = useSearchParams();
@@ -160,7 +160,7 @@ const StudentRegistrationForm = () => {
       default:
         icon = <XCircle size={64} />;
         title = "Oops!";
-        message = "Something went wrong. Please check your connection to the server at 54.227.228.210 and try again.";
+        message = "Something went wrong. Please check your connection to the server at 100.31.140.101 and try again.";
         typeClass = "error";
         break;
     }

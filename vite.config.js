@@ -9,7 +9,7 @@ export default defineConfig({
     host: true, // Exposes the server on the local network
     proxy: {
       '/api': {
-        target: 'http://54.227.228.210:8080',
+        target: 'http://100.31.140.101:8081',
         changeOrigin: true,
         secure: false, // Useful for self-signed certificates or HTTP
         rewrite: (path) => path.replace(/^\/api/, '/api'),
