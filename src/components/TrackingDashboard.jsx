@@ -19,7 +19,6 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   const [isRetrying, setIsRetrying] = useState(false);
   const [templateUrl, setTemplateUrl] = useState(null);
   const [filter, setFilter] = useState('all');
-  const [timeFilter, setTimeFilter] = useState('allTime');
   const [editingRecord, setEditingRecord] = useState(null);
   const [previewRecord, setPreviewRecord] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
@@ -207,16 +206,8 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   // --- 4. FILTERING & TOTALS CALCULATION ---
   // Step 1: Apply Global Filters (Time and Search) - These define the current "context"
   const baseFilteredLogs = logs.filter(log => {
-    // Time Filter
-    const today = new Date();
-    const currentDate = today.toISOString().split('T')[0];
-    const currentMonth = today.toISOString().slice(0, 7);
-
     // Support multiple date formats (ISO: YYYY-MM-DD or standard display)
     const logDate = log.date || '';
-
-    if (timeFilter === 'today' && !logDate.includes(currentDate)) return false;
-    if (timeFilter === 'thisMonth' && !logDate.includes(currentMonth)) return false;
 
     // Search Query Filter
     if (searchQuery.trim() !== '') {
@@ -343,17 +334,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
 
         <div className="dashboard-controls" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
 
-          {/* Time Filter Dropdown */}
-          <select
-            value={timeFilter}
-            onChange={(e) => setTimeFilter(e.target.value)}
-            className="input-field"
-            style={{ width: 'auto', padding: '6px 16px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', background: 'transparent', fontWeight: '500' }}
-          >
-            <option value="allTime">All Time</option>
-            <option value="thisMonth">This Month</option>
-            <option value="today">Today</option>
-          </select>
+
 
           {/* Status Filter Buttons */}
           <div className="filter-tabs" style={{ display: 'flex', gap: '6px', background: 'rgba(0,0,0,0.04)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.02)' }}>
