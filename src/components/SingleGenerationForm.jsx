@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Mail, Award, Send, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
 import { isRetryable } from '../utils/statusUtils';
 
-const API_BASE = 'http://54.224.81.46:8080';
+const API_BASE = 'http://54.227.228.210:8080';
 
 const SingleGenerationForm = ({ onComplete, onDataChange }) => {
   const [formData, setFormData] = useState({

@@ -8,7 +8,7 @@ import { startScheduler, stopScheduler } from '../services/schedulerService';
 
 import './TrackingDashboard.css';
 
-const API_BASE = 'http://54.224.81.46:8080';
+const API_BASE = 'http://54.227.228.210:8080';
 
 const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
   // --- 1. STATE DEFINITIONS ---
@@ -336,7 +336,7 @@ const TrackingDashboard = ({ searchQuery = '', templateFile }) => {
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Zap size={14} color="var(--accent-primary)" />
-              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>54.224.81.46:8080</code>
+              Remote: <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>54.227.228.210:8080</code>
             </p>
           </div>
         </div>
